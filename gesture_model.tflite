@@ -1,0 +1,34 @@
+import tensorflow as tf
+import numpy as np
+
+# Define a simple model
+def create_simple_model(input_shape):
+    model = tf.keras.Sequential([
+        tf.keras.layers.Flatten(input_shape=input_shape),
+        tf.keras.layers.Dense(10, activation='relu'),
+        tf.keras.layers.Dense(2, activation='softmax')  # Adjust for binary classification
+    ])
+    return model
+
+# Create dummy dataset for training
+train_images = np.random.rand(100, 10)  # 100 samples, 10 features
+train_labels = np.random.randint(0, 2, size=(100,))  # Binary labels (0 or 1)
+train_labels = tf.keras.utils.to_categorical(train_labels)  # One-hot encoding
+
+# Create and compile the model
+input_shape = (10,)
+model = create_simple_model(input_shape)
+model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+
+# Train the model
+model.fit(train_images, train_labels, epochs=1, batch_size=16)
+
+# Convert the model to TensorFlow Lite
+converter = tf.lite.TFLiteConverter.from_keras_model(model)
+tflite_model = converter.convert()
+
+# Save the TFLite model
+with open('gesture_model.tflite', 'wb') as f:
+    f.write(tflite_model)
+
+print("TensorFlow Lite model saved as 'gesture_model.tflite'")
